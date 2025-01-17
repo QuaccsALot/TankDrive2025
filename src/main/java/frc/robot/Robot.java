@@ -4,9 +4,13 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+import frc.robot.Constants.DriveConstants;
+
+
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -14,19 +18,32 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * this project, you must also update the Main.java file in the project.
  */
 public class Robot extends TimedRobot {
-  private static final String kDefaultAuto = "Default";
-  private static final String kCustomAuto = "My Auto";
-  private String m_autoSelected;
-  private final SendableChooser<String> m_chooser = new SendableChooser<>();
+  
+  private final static WPI_VictorSPX driveBackLeftMotor = new WPI_VictorSPX(DriveConstants.kBackLeftMotorPort);
+  private final static WPI_VictorSPX driveTopLeftMotor = new WPI_VictorSPX(DriveConstants.kTopLeftMotorPort);
+  private final static WPI_VictorSPX driveBackRightMotor = new WPI_VictorSPX(DriveConstants.kBackRightMotorPort);
+  private final static WPI_VictorSPX driveTopRightMotor = new WPI_VictorSPX(DriveConstants.kTopRightMotorPort);
+
+  private final DifferentialDrive m_robotDrive;
+
+  private final PS4Controller driveStick = new PS4Controller(0);
+
 
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
   public Robot() {
-    m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
-    m_chooser.addOption("My Auto", kCustomAuto);
-    SmartDashboard.putData("Auto choices", m_chooser);
+  
+    driveBackRightMotor.setInverted(true);
+    driveTopRightMotor.setInverted(true);
+    driveBackLeftMotor.follow(driveTopLeftMotor);
+    driveBackRightMotor.follow(driveTopRightMotor);
+    
+
+    m_robotDrive = new DifferentialDrive(driveTopLeftMotor,driveTopRightMotor);
+    m_robotDrive.arcadeDrive(-driveStick.getLeftY(),-driveStick.getRightX());
+
   }
 
   /**
@@ -51,24 +68,14 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void autonomousInit() {
-    m_autoSelected = m_chooser.getSelected();
-    // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
-    System.out.println("Auto selected: " + m_autoSelected);
+    
   }
 
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    switch (m_autoSelected) {
-      case kCustomAuto:
-        // Put custom auto code here
-        break;
-      case kDefaultAuto:
-      default:
-        // Put default auto code here
-        break;
     }
-  }
+  
 
   /** This function is called once when teleop is enabled. */
   @Override
@@ -76,7 +83,9 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    m_robotDrive.arcadeDrive(-driveStick.getLeftY(),-driveStick.getRightX());
+  }
 
   /** This function is called once when the robot is disabled. */
   @Override
