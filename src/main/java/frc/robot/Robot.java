@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 import frc.robot.Constants.DriveConstants;
@@ -28,6 +29,7 @@ public class Robot extends TimedRobot {
 
   private final PS4Controller driveStick = new PS4Controller(0);
 
+private final Timer timer = new Timer();
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -42,7 +44,7 @@ public class Robot extends TimedRobot {
     
 
     m_robotDrive = new DifferentialDrive(driveTopLeftMotor,driveTopRightMotor);
-    m_robotDrive.arcadeDrive(-driveStick.getLeftY(),-driveStick.getRightX());
+
 
   }
 
@@ -66,14 +68,28 @@ public class Robot extends TimedRobot {
    * below with additional strings. If using the SendableChooser make sure to add them to the
    * chooser code above as well.
    */
-  @Override
+  private double startTime;
+   @Override
   public void autonomousInit() {
-    
+    timer.reset();
+    timer.start();
   }
 
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
+    double time = Timer.getFPGATimestamp();
+    if (time - startTime < 3) {
+      driveBackLeftMotor.set(0.5);
+      driveTopLeftMotor.set(0.5);
+      driveBackRightMotor.set(0.5);
+      driveTopRightMotor.set(0.5);
+    } else {
+      driveBackLeftMotor.set(0);
+      driveTopLeftMotor.set(0);
+      driveBackRightMotor.set(0);
+      driveTopRightMotor.set(0);
+    }
     }
   
 
@@ -84,6 +100,11 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
+    if (driveStick.getSquareButton()) {
+      // god please help me idk what i'm doing
+
+    }
+    
     m_robotDrive.arcadeDrive(-driveStick.getLeftY(),-driveStick.getRightX());
   }
 
